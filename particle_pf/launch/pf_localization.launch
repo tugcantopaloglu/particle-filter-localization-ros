@@ -1,0 +1,19 @@
+<launch>
+  <arg name="bag" default="" />
+  <arg name="gt_topic" default="/gazebo/model_states" />
+  <param name="use_sim_time" value="true" />
+  <group ns="pf">
+    <rosparam file="$(find particle_pf)/config/params.yaml" />
+    <node pkg="particle_pf" type="particle_filter_node" name="particle_filter">
+      <param name="gt_topic" value="$(arg gt_topic)" />
+      <remap from="scan" to="/front/scan" />
+      <remap from="cmd_vel" to="/husky_velocity_controller/cmd_vel" />
+
+    </node>
+    <node pkg="tf" type="static_transform_publisher"
+      name="map_to_world"
+      args="4.44 3.76 0   0 0 0   map world 100" />
+  </group>
+  <node pkg="rosbag" type="play" name="bagplay" args="$(arg bag) --clock"
+    unless="$(eval arg('bag') == '')" />
+</launch>
